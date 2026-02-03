@@ -31,10 +31,12 @@ export async function registerRoutes(
       resave: false,
       saveUninitialized: false,
       store: storage.sessionStore,
+      name: "sid", // Explicit session cookie name
       proxy: true,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true, // Force secure on VPS (assuming HTTPS)
+        sameSite: "none", // Required for cross-site if domain mismatch or proxied
+        httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       },
     }),
