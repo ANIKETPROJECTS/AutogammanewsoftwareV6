@@ -609,14 +609,6 @@ Auto Gamma Car Care Studio`;
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white border-none h-9 text-xs font-bold uppercase"
-                            onClick={() => handleDownloadPDF(inquiry)}
-                          >
-                            Download
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
                             className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white border-none h-9 text-xs font-bold uppercase"
                             onClick={() => handleSendWhatsApp(inquiry)}
                           >
