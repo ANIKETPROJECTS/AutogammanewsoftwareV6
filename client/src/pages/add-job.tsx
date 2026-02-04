@@ -404,7 +404,17 @@ export default function AddJobPage() {
         if (roll && existingField.rollId !== selectedPPFRoll) {
           // If different roll, append to description format: Quantity: X (from Roll1) , Quantity: Y (from Roll2)
           if (updatedName.includes("Quantity:")) {
-            updatedName = `${updatedName} , ${newRollDesc}`;
+            // Check if THIS specific roll is already in the string (even if it's not the primary rollId)
+            const rollRegex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${roll.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`);
+            const rollMatch = updatedName.match(rollRegex);
+            
+            if (rollMatch) {
+              const oldQty = parseFloat(rollMatch[1]);
+              const newQtyForThisRoll = oldQty + (rollQty || 0);
+              updatedName = updatedName.replace(rollRegex, `Quantity: ${newQtyForThisRoll}sqft (from ${roll.name})`);
+            } else {
+              updatedName = `${updatedName} , ${newRollDesc}`;
+            }
           } else {
             // First time adding a second roll
             const existingRollDesc = `Quantity: ${existingField.rollUsed}sqft (from ${existingField.rollName || 'Initial Roll'})`;
@@ -1068,9 +1078,15 @@ export default function AddJobPage() {
                           <SelectItem key={roll._id || roll.id} value={(roll._id || roll.id)!}>
                             {roll.name} ({(() => {
                               const used = form.watch("ppfs")
-                                .filter((p: any) => p.rollId === (roll._id || roll.id))
-                                .reduce((sum: number, p: any) => sum + (p.rollUsed || 0), 0);
-                              return roll.stock - used;
+                                .filter((p: any) => p.ppfId === selectedPPF) // Filter by PPF first
+                                .reduce((sum: number, p: any) => {
+                                  // Extract roll quantity from description for this specific roll
+                                  const rollNameEscaped = roll.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                  const regex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${rollNameEscaped}\\)`);
+                                  const match = p.name.match(regex);
+                                  return sum + (match ? parseFloat(match[1]) : 0);
+                                }, 0);
+                              return (roll.stock || 0) - used;
                             })()} sqft)
                           </SelectItem>
                         ))}
@@ -1106,8 +1122,18 @@ export default function AddJobPage() {
                       {selectedPPF ? (() => {
                         const totalStock = currentPPF?.rolls?.reduce((acc: number, r: any) => acc + (r.stock || 0), 0) || 0;
                         const usedInCurrentJob = ppfFields.reduce((acc, field: any) => {
-                          const nameMatch = field.name.startsWith(currentPPF?.name);
-                          return nameMatch ? acc + (field.rollUsed || 0) : acc;
+                          const isSamePPF = field.ppfId === selectedPPF;
+                          if (!isSamePPF) return acc;
+                          
+                          // Sum all quantities from the description
+                          const matches = field.name.match(/Quantity: (\d+(?:\.\d+)?)sqft/g);
+                          if (matches) {
+                            return acc + matches.reduce((sum: number, m: string) => {
+                              const q = m.match(/Quantity: (\d+(?:\.\d+)?)sqft/);
+                              return sum + (q ? parseFloat(q[1]) : 0);
+                            }, 0);
+                          }
+                          return acc + (field.rollUsed || 0);
                         }, 0);
                         return `${totalStock - usedInCurrentJob} sqft`;
                       })() : "Select PPF"}
