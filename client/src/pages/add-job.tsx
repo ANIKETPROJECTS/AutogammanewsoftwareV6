@@ -354,7 +354,7 @@ export default function AddJobPage() {
 
   const handleAddPPF = () => {
     const p = ppfMasters.find(item => item.id === selectedPPF);
-    const roll = p?.rolls?.find(r => r._id === selectedPPFRoll || r.id === selectedPPFRoll);
+    const roll = p?.rolls?.find((r: any) => r._id === selectedPPFRoll || r.id === selectedPPFRoll);
     const tech = technicians.find(t => t.id === selectedTechnician);
     const vehicleType = form.getValues("vehicleType");
 
@@ -1058,7 +1058,7 @@ export default function AddJobPage() {
                             <span className="text-sm font-medium">{(field as any).name}</span>
                             {(field as any).rollUsed && (
                               <span className="text-xs text-slate-500">
-                                Quantity: {(field as any).rollUsed}m
+                                Quantity: {(field as any).rollUsed}sqft {(field as any).rollName ? `(from ${(field as any).rollName})` : ""}
                               </span>
                             )}
                           </div>
