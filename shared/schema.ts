@@ -201,7 +201,8 @@ export const jobCardSchema = z.object({
   ppfs: z.array(jobCardItemSchema.extend({ 
     technician: z.string().optional(),
     rollId: z.string().optional(),
-    rollUsed: z.number().optional()
+    rollUsed: z.number().optional(),
+    warranty: z.string().optional(),
   })).default([]),
   accessories: z.array(jobCardItemSchema.extend({ quantity: z.number().optional() })).default([]),
   laborCharge: z.number().default(0),
