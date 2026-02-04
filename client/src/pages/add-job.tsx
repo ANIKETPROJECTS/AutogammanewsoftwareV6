@@ -564,10 +564,14 @@ export default function AddJobPage() {
 
   const currentPPF = ppfMasters.find(p => p.id === selectedPPF);
   const selectedRoll = currentPPF?.rolls?.find((r: any) => r._id === selectedPPFRoll || r.id === selectedPPFRoll);
-  const usedInCurrentJob = form.watch("ppfs")
+  
+  // Calculate total used in current job for ALL rolls of this PPF type, 
+  // but we specifically need it for the selected roll to calculate its real-time stock
+  const usedInCurrentJobForSelectedRoll = form.watch("ppfs")
     .filter((p: any) => p.rollId === selectedPPFRoll)
     .reduce((sum: number, p: any) => sum + (p.rollUsed || 0), 0);
-  const realTimeStock = selectedRoll ? selectedRoll.stock - usedInCurrentJob : 0;
+
+  const realTimeStock = selectedRoll ? selectedRoll.stock - usedInCurrentJobForSelectedRoll : 0;
   const { data: vehicleTypes = [] } = useQuery<any[]>({
     queryKey: [api.masters.vehicleTypes.list.path],
   });
@@ -1011,7 +1015,12 @@ export default function AddJobPage() {
                       <SelectContent>
                         {currentPPF?.rolls?.map((roll: any) => (
                           <SelectItem key={roll._id || roll.id} value={(roll._id || roll.id)!}>
-                            {roll.name} ({roll.stock} sqft)
+                            {roll.name} ({(() => {
+                              const used = form.watch("ppfs")
+                                .filter((p: any) => p.rollId === (roll._id || roll.id))
+                                .reduce((sum: number, p: any) => sum + (p.rollUsed || 0), 0);
+                              return roll.stock - used;
+                            })()} sqft)
                           </SelectItem>
                         ))}
                       </SelectContent>
