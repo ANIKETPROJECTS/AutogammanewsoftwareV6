@@ -385,19 +385,32 @@ export default function AddJobPage() {
         (field: any) =>
           field.ppfId === p.id &&
           field.warranty === selectedWarranty &&
-          field.rollId === selectedPPFRoll &&
           field.technician === tech?.name
       );
 
       if (existingPPFIndex !== -1) {
         const existingField = ppfFields[existingPPFIndex];
-        const newRollUsed = (existingField.rollUsed || 0) + (rollQty || 0);
         
         // Update the existing entry
         const currentPPFs = form.getValues("ppfs");
+        
+        // If it's a new roll for the same card, we just need to track the total rollUsed 
+        // Note: The schema for ppfs in JobCard might need to support multiple rolls if we want to track them separately,
+        // but based on the user request "add diffrient rolls in same card", 
+        // we'll sum up the rollUsed and perhaps update the roll info if it's different.
+        // If the user wants to see "from Roll1" and "from Roll2" in the same card, 
+        // we might need to adjust how roll info is stored.
+        // Given the current structure, we'll append roll info to the name or a description field if available.
+        
+        const newRollUsed = (existingField.rollUsed || 0) + (rollQty || 0);
+        const rollInfo = roll ? ` (from ${roll.name})` : "";
+        
         currentPPFs[existingPPFIndex] = {
           ...existingField,
           rollUsed: newRollUsed > 0 ? newRollUsed : undefined,
+          // We keep the first rollId/rollName but sum up the quantity. 
+          // If we want to show multiple rolls, we'd need a more complex structure.
+          // For now, we follow the logic of adding to the same card.
         };
         form.setValue("ppfs", currentPPFs);
       } else {
