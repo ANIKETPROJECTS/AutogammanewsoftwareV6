@@ -367,11 +367,11 @@ export default function AddJobPage() {
       return;
     }
 
-    // Check if roll has enough quantity
-    if (roll && rollQty > roll.stock) {
+    // Check if roll has enough quantity using real-time stock
+    if (roll && rollQty > realTimeStock) {
       toast({
         title: "Insufficient Stock",
-        description: `Selected roll only has ${roll.stock} sqft remaining.`,
+        description: `Selected roll only has ${realTimeStock} sqft remaining (accounting for other items in this job).`,
         variant: "destructive",
       });
       return;
@@ -563,6 +563,11 @@ export default function AddJobPage() {
   };
 
   const currentPPF = ppfMasters.find(p => p.id === selectedPPF);
+  const selectedRoll = currentPPF?.rolls?.find((r: any) => r._id === selectedPPFRoll || r.id === selectedPPFRoll);
+  const usedInCurrentJob = form.watch("ppfs")
+    .filter((p: any) => p.rollId === selectedPPFRoll)
+    .reduce((sum: number, p: any) => sum + (p.rollUsed || 0), 0);
+  const realTimeStock = selectedRoll ? selectedRoll.stock - usedInCurrentJob : 0;
   const { data: vehicleTypes = [] } = useQuery<any[]>({
     queryKey: [api.masters.vehicleTypes.list.path],
   });
