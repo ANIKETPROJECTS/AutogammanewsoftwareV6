@@ -383,15 +383,13 @@ export default function AddJobPage() {
     if (p && selectedWarranty) {
       // User says: "ppf type like for eg Garware Elite will always have atmost 1 card only"
       // So we search for any existing entry with the same PPF ID ONLY.
-      const existingPPFIndex = ppfFields.findIndex(
+      const currentPPFs = [...form.getValues("ppfs")];
+      const existingPPFIndex = currentPPFs.findIndex(
         (field: any) => field.ppfId === p.id
       );
 
       if (existingPPFIndex !== -1) {
-        const existingField = ppfFields[existingPPFIndex];
-        
-        // Update the existing entry
-        const currentPPFs = form.getValues("ppfs");
+        const existingField = currentPPFs[existingPPFIndex];
         
         const newRollUsed = (existingField.rollUsed || 0) + (rollQty || 0);
         
