@@ -69,6 +69,7 @@ export default function AppointmentsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.appointments.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.dashboard.get.path] });
       setIsFormOpen(false);
       setEditingAppointment(null);
       toast({ title: "Appointment booked successfully" });
@@ -82,6 +83,7 @@ export default function AppointmentsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.appointments.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.dashboard.get.path] });
       setIsFormOpen(false);
       setEditingAppointment(null);
       toast({ title: "Appointment updated" });
@@ -94,6 +96,7 @@ export default function AppointmentsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.appointments.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.dashboard.get.path] });
       toast({ title: "Appointment deleted" });
     },
   });
