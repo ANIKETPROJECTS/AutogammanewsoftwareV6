@@ -439,11 +439,13 @@ export default function AddJobPage() {
     const option = vehiclePricing?.options.find(o => o.warrantyName === selectedWarranty);
     
     if (p && selectedWarranty) {
-      // User says: "ppf type like for eg Garware Elite will always have atmost 1 card only"
-      // So we search for any existing entry with the same PPF ID AND Warranty.
       const currentPPFs = [...form.getValues("ppfs")];
+      // Updated matching logic to be more robust during edits
       const existingPPFIndex = currentPPFs.findIndex(
-        (field: any) => field.ppfId === p.id && field.warranty === selectedWarranty
+        (field: any) => {
+          const fieldPpfId = field.ppfId || field.id;
+          return fieldPpfId === p.id && field.warranty === selectedWarranty;
+        }
       );
 
       if (existingPPFIndex !== -1) {
@@ -451,7 +453,6 @@ export default function AddJobPage() {
         
         const newRollUsed = (existingField.rollUsed || 0) + (rollQty || 0);
         
-        // Track rolls used in an array to support multi-roll deduction
         const rollsUsed = existingField.rollsUsed || [];
         const existingRollIndex = rollsUsed.findIndex((r: any) => r.rollId === selectedPPFRoll);
         
@@ -465,27 +466,27 @@ export default function AddJobPage() {
           });
         }
 
-        // Build the description for multiple rolls if different roll is used
         let updatedName = `${p.name} (${vehicleType} - ${selectedWarranty})`;
-
         const newRollDesc = `Quantity: ${rollQty}sqft (from ${roll?.name || 'Unknown Roll'})`;
         
-        // Rebuild or append quantity info
-        // We look at the existing quantities in the name/description
+        // Robust multi-line name parsing and rebuilding
         if (existingField.name.includes("Quantity:")) {
-            const rollRegex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${roll?.name?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Unknown Roll'}\\)`);
-            const rollMatch = existingField.name.match(rollRegex);
-            
-            if (rollMatch) {
-              const oldQty = parseFloat(rollMatch[1]);
-              const newQtyForThisRoll = oldQty + (rollQty || 0);
-              updatedName = `${updatedName}\n` + existingField.name.split('\n').slice(1).join('\n').replace(rollRegex, `Quantity: ${newQtyForThisRoll}sqft (from ${roll?.name || 'Unknown Roll'})`);
-            } else {
-              // Append to existing quantities
-              updatedName = `${updatedName}\n` + existingField.name.split('\n').slice(1).join('\n') + ` , ${newRollDesc}`;
-            }
+          const rollRegex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${roll?.name?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Unknown Roll'}\\)`);
+          const nameLines = existingField.name.split('\n');
+          const header = nameLines[0];
+          let quantitiesPart = nameLines.slice(1).join('\n');
+          
+          if (quantitiesPart.match(rollRegex)) {
+            const rollMatch = quantitiesPart.match(rollRegex);
+            const oldQty = parseFloat(rollMatch![1]);
+            const newQtyForThisRoll = oldQty + (rollQty || 0);
+            quantitiesPart = quantitiesPart.replace(rollRegex, `Quantity: ${newQtyForThisRoll}sqft (from ${roll?.name || 'Unknown Roll'})`);
+            updatedName = `${header}\n${quantitiesPart}`;
+          } else {
+            updatedName = `${header}\n${quantitiesPart} , ${newRollDesc}`;
+          }
         } else {
-            updatedName = `${updatedName}\n${newRollDesc}`;
+          updatedName = `${updatedName}\n${newRollDesc}`;
         }
 
         currentPPFs[existingPPFIndex] = {
@@ -493,9 +494,9 @@ export default function AddJobPage() {
           rollUsed: newRollUsed > 0 ? newRollUsed : undefined,
           rollsUsed: rollsUsed,
           name: updatedName,
-          warranty: selectedWarranty, // Update warranty if different
-          technician: tech?.name, // Update technician if different
-          price: option?.price || 0, // Update price if warranty changed
+          warranty: selectedWarranty,
+          technician: tech?.name || existingField.technician,
+          price: option?.price || 0,
         };
         form.setValue("ppfs", currentPPFs);
       } else {
