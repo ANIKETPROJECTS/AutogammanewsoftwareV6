@@ -381,6 +381,9 @@ export default function AddJobPage() {
     const option = vehiclePricing?.options.find(o => o.warrantyName === selectedWarranty);
     
     if (p && selectedWarranty) {
+      // User says: "selected PPF will only have 1 card no mater i create a new or edit/update it"
+      // So we search for any existing entry with the same PPF ID and Warranty and Technician
+      // and merge the quantity regardless of the rollId.
       const existingPPFIndex = ppfFields.findIndex(
         (field: any) =>
           field.ppfId === p.id &&
@@ -401,43 +404,30 @@ export default function AddJobPage() {
         
         const newRollDesc = `Quantity: ${rollQty}sqft (from ${roll?.name || 'Unknown Roll'})`;
         
-        if (roll && existingField.rollId !== selectedPPFRoll) {
-          // If different roll, append to description format: Quantity: X (from Roll1) , Quantity: Y (from Roll2)
-          if (updatedName.includes("Quantity:")) {
-            // Check if THIS specific roll is already in the string (even if it's not the primary rollId)
-            const rollRegex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${roll.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`);
-            const rollMatch = updatedName.match(rollRegex);
-            
-            if (rollMatch) {
-              const oldQty = parseFloat(rollMatch[1]);
-              const newQtyForThisRoll = oldQty + (rollQty || 0);
-              updatedName = updatedName.replace(rollRegex, `Quantity: ${newQtyForThisRoll}sqft (from ${roll.name})`);
-            } else {
-              updatedName = `${updatedName} , ${newRollDesc}`;
-            }
-          } else {
-            // First time adding a second roll
-            const existingRollDesc = `Quantity: ${existingField.rollUsed}sqft (from ${existingField.rollName || 'Initial Roll'})`;
-            updatedName = `${updatedName}\n${existingRollDesc} , ${newRollDesc}`;
-          }
-        } else if (roll && existingField.rollId === selectedPPFRoll) {
-          // If same roll, update quantity in description
-          const regex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${roll.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`);
-          const match = updatedName.match(regex);
-          if (match) {
-            const oldQty = parseFloat(match[1]);
+        // Handle description merging based on roll name
+        if (updatedName.includes("Quantity:")) {
+          const rollRegex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${roll?.name?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Unknown Roll'}\\)`);
+          const rollMatch = updatedName.match(rollRegex);
+          
+          if (rollMatch) {
+            const oldQty = parseFloat(rollMatch[1]);
             const newQtyForThisRoll = oldQty + (rollQty || 0);
-            updatedName = updatedName.replace(regex, `Quantity: ${newQtyForThisRoll}sqft (from ${roll.name})`);
+            updatedName = updatedName.replace(rollRegex, `Quantity: ${newQtyForThisRoll}sqft (from ${roll?.name || 'Unknown Roll'})`);
           } else {
-            // Fallback if formatting changed or not found
-            updatedName = `${updatedName}\n${newRollDesc}`;
+            // Append as a comma-separated quantity if it's a new roll for the same card
+            updatedName = `${updatedName} , ${newRollDesc}`;
           }
+        } else {
+          // Fallback if formatting changed
+          updatedName = `${updatedName}\n${newRollDesc}`;
         }
 
         currentPPFs[existingPPFIndex] = {
           ...existingField,
           rollUsed: newRollUsed > 0 ? newRollUsed : undefined,
           name: updatedName,
+          // We keep the primary rollId of the first entry, or we could update it. 
+          // Usually, the backend might need to know which rolls were used.
         };
         form.setValue("ppfs", currentPPFs);
       } else {
