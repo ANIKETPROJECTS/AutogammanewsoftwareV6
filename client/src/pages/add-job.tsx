@@ -203,11 +203,12 @@ export default function AddJobPage() {
             // Group rolls for same PPF and Warranty
             existing.rollUsed = (existing.rollUsed || 0) + (p.rollUsed || 0);
             
-            // Add quantity info to description
-            const rollMatch = p.name.match(/Quantity: (\d+(?:\.\d+)?)sqft \(from (.*?)\)/);
-            if (rollMatch) {
-              const qty = rollMatch[1];
-              const rollName = rollMatch[2];
+            // Rebuild the name by aggregating quantities from the name strings
+            // We need to parse all quantities from the incoming name too
+            const rollMatches = p.name.matchAll(/Quantity: (\d+(?:\.\d+)?)sqft \(from (.*?)\)/g);
+            for (const match of rollMatches) {
+              const qty = match[1];
+              const rollName = match[2];
               
               const existingRollRegex = new RegExp(`Quantity: (\\d+(?:\\.\\d+)?)sqft \\(from ${rollName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`);
               const existingRollMatch = existing.name.match(existingRollRegex);
@@ -222,19 +223,25 @@ export default function AddJobPage() {
             }
             
             // Update rollsUsed array
-            if (p.rollId && p.rollUsed) {
+            const rollsToMerge = p.rollsUsed || (p.rollId ? [{
+              rollId: p.rollId,
+              rollName: p.rollName || "Unknown Roll",
+              rollUsed: p.rollUsed
+            }] : []);
+
+            rollsToMerge.forEach((newRoll: any) => {
               existing.rollsUsed = existing.rollsUsed || [];
-              const existingRollEntry = existing.rollsUsed.find((r: any) => r.rollId === p.rollId);
+              const existingRollEntry = existing.rollsUsed.find((r: any) => r.rollId === newRoll.rollId);
               if (existingRollEntry) {
-                existingRollEntry.rollUsed += p.rollUsed;
+                existingRollEntry.rollUsed += newRoll.rollUsed;
               } else {
-                existingRollEntry.push({
-                  rollId: p.rollId,
-                  rollName: p.rollName || "Unknown Roll",
-                  rollUsed: p.rollUsed
+                existing.rollsUsed.push({
+                  rollId: newRoll.rollId,
+                  rollName: newRoll.rollName || "Unknown Roll",
+                  rollUsed: newRoll.rollUsed
                 });
               }
-            }
+            });
           } else {
             acc.push({
               ppfId,
