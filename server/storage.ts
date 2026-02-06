@@ -831,32 +831,24 @@ export class MongoStorage implements IStorage {
     if (jobCard.ppfs && jobCard.ppfs.length > 0) {
       for (const ppfItem of jobCard.ppfs) {
         const ppfId = (ppfItem as any).ppfId || ppfItem.id;
-        console.log(`Checking PPF item for deduction. ppfId: ${ppfId}, rollUsed: ${(ppfItem as any).rollUsed}`);
-        if ((ppfItem as any).rollUsed > 0 && ppfId) {
-          // Find the PPF master and deduct from the first roll with enough stock
+        const rollsToDeduct = (ppfItem as any).rollsUsed || (ppfItem.rollId ? [{
+          rollId: ppfItem.rollId,
+          rollUsed: (ppfItem as any).rollUsed
+        }] : []);
+
+        if (rollsToDeduct.length > 0 && ppfId) {
           const ppfMaster = await PPFMasterModel.findById(ppfId);
-          if (ppfMaster) {
-            console.log(`Found PPF Master: ${ppfMaster.name}. Rolls: ${ppfMaster.rolls.length}`);
-            if (ppfMaster.rolls && ppfMaster.rolls.length > 0) {
-              let remainingToDeduct = (ppfItem as any).rollUsed;
-              for (const roll of ppfMaster.rolls as any) {
-                console.log(`Processing roll ${roll.name}. Current stock: ${roll.stock}`);
-                if (roll.stock >= remainingToDeduct) {
-                  roll.stock -= remainingToDeduct;
-                  remainingToDeduct = 0;
-                  break;
-                } else {
-                  remainingToDeduct -= roll.stock;
-                  roll.stock = 0;
-                }
-                if (remainingToDeduct <= 0) break;
+          if (ppfMaster && ppfMaster.rolls) {
+            for (const entry of rollsToDeduct) {
+              const roll = (ppfMaster.rolls as any[]).find(r => 
+                (r._id && r._id.toString() === entry.rollId) || r.id === entry.rollId
+              );
+              if (roll && entry.rollUsed > 0) {
+                roll.stock -= entry.rollUsed;
               }
-              ppfMaster.markModified("rolls");
-              const saved = await ppfMaster.save();
-              console.log(`Saved PPF Master. New roll stock: ${saved.rolls[0].stock}`);
             }
-          } else {
-            console.log(`PPF Master not found for id: ${ppfId}`);
+            ppfMaster.markModified("rolls");
+            await ppfMaster.save();
           }
         }
       }
@@ -878,12 +870,22 @@ export class MongoStorage implements IStorage {
       if (existingJob.ppfs && existingJob.ppfs.length > 0) {
         for (const ppfItem of existingJob.ppfs) {
           const ppfId = (ppfItem as any).ppfId || ppfItem.id;
-          if ((ppfItem as any).rollUsed > 0 && ppfId) {
+          const rollsToRevert = (ppfItem as any).rollsUsed || (ppfItem.rollId ? [{
+            rollId: ppfItem.rollId,
+            rollUsed: (ppfItem as any).rollUsed
+          }] : []);
+
+          if (rollsToRevert.length > 0 && ppfId) {
             const ppfMaster = await PPFMasterModel.findById(ppfId);
-            if (ppfMaster && ppfMaster.rolls && ppfMaster.rolls.length > 0) {
-              // Add back to the first roll (simplified)
-              const firstRoll = ppfMaster.rolls[0] as any;
-              firstRoll.stock += (ppfItem as any).rollUsed;
+            if (ppfMaster && ppfMaster.rolls) {
+              for (const entry of rollsToRevert) {
+                const roll = (ppfMaster.rolls as any[]).find(r => 
+                  (r._id && r._id.toString() === entry.rollId) || r.id === entry.rollId
+                );
+                if (roll && entry.rollUsed > 0) {
+                  roll.stock += entry.rollUsed;
+                }
+              }
               ppfMaster.markModified("rolls");
               await ppfMaster.save();
             }
@@ -894,25 +896,24 @@ export class MongoStorage implements IStorage {
       // 2. Apply new deductions
       for (const ppfItem of jobCard.ppfs) {
         const ppfId = (ppfItem as any).ppfId || ppfItem.id;
-        if ((ppfItem as any).rollUsed > 0 && ppfId) {
+        const rollsToDeduct = (ppfItem as any).rollsUsed || (ppfItem.rollId ? [{
+          rollId: ppfItem.rollId,
+          rollUsed: (ppfItem as any).rollUsed
+        }] : []);
+
+        if (rollsToDeduct.length > 0 && ppfId) {
           const ppfMaster = await PPFMasterModel.findById(ppfId);
-          if (ppfMaster) {
-            if (ppfMaster.rolls && ppfMaster.rolls.length > 0) {
-              let remainingToDeduct = (ppfItem as any).rollUsed;
-              for (const roll of ppfMaster.rolls as any) {
-                if (roll.stock >= remainingToDeduct) {
-                  roll.stock -= remainingToDeduct;
-                  remainingToDeduct = 0;
-                  break;
-                } else {
-                  remainingToDeduct -= roll.stock;
-                  roll.stock = 0;
-                }
-                if (remainingToDeduct <= 0) break;
+          if (ppfMaster && ppfMaster.rolls) {
+            for (const entry of rollsToDeduct) {
+              const roll = (ppfMaster.rolls as any[]).find(r => 
+                (r._id && r._id.toString() === entry.rollId) || r.id === entry.rollId
+              );
+              if (roll && entry.rollUsed > 0) {
+                roll.stock -= entry.rollUsed;
               }
-              ppfMaster.markModified("rolls");
-              await ppfMaster.save();
             }
+            ppfMaster.markModified("rolls");
+            await ppfMaster.save();
           }
         }
       }

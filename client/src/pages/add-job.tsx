@@ -393,6 +393,20 @@ export default function AddJobPage() {
         
         const newRollUsed = (existingField.rollUsed || 0) + (rollQty || 0);
         
+        // Track rolls used in an array to support multi-roll deduction
+        const rollsUsed = existingField.rollsUsed || [];
+        const existingRollIndex = rollsUsed.findIndex((r: any) => r.rollId === selectedPPFRoll);
+        
+        if (existingRollIndex !== -1) {
+          rollsUsed[existingRollIndex].rollUsed += (rollQty || 0);
+        } else {
+          rollsUsed.push({
+            rollId: selectedPPFRoll,
+            rollName: roll?.name || "Unknown Roll",
+            rollUsed: rollQty || 0
+          });
+        }
+
         // Build the description for multiple rolls if different roll is used
         let updatedName = `${p.name} (${vehicleType} - ${selectedWarranty})`;
 
@@ -419,6 +433,7 @@ export default function AddJobPage() {
         currentPPFs[existingPPFIndex] = {
           ...existingField,
           rollUsed: newRollUsed > 0 ? newRollUsed : undefined,
+          rollsUsed: rollsUsed,
           name: updatedName,
           warranty: selectedWarranty, // Update warranty if different
           technician: tech?.name, // Update technician if different
@@ -432,6 +447,11 @@ export default function AddJobPage() {
           rollId: selectedPPFRoll,
           rollName: roll?.name || "Unknown Roll",
           rollUsed: rollQty > 0 ? rollQty : undefined,
+          rollsUsed: [{
+            rollId: selectedPPFRoll,
+            rollName: roll?.name || "Unknown Roll",
+            rollUsed: rollQty || 0
+          }],
           price: option?.price || 0,
           technician: tech?.name,
           warranty: selectedWarranty
