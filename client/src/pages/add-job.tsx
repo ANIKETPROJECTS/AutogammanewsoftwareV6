@@ -407,6 +407,7 @@ export default function AddJobPage() {
     if (s) {
       appendService({ 
         serviceId: s.id!, 
+        id: s.id!,
         name: `${s.name} (${vehicleType})`,
         price: vehiclePricing?.price || 0,
         technician: tech?.name

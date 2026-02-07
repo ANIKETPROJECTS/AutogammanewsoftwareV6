@@ -666,19 +666,22 @@ export class MongoStorage implements IStorage {
         ...s,
         id: s.id || s._id?.toString() || s.serviceId,
         serviceId: s.serviceId || s.id || s._id?.toString(),
-        name: s.name || s.serviceName || "Unnamed Service"
+        name: s.name || s.serviceName || "Unnamed Service",
+        price: s.price || 0
       })) || [],
       ppfs: (j as any).ppfs?.map((p: any) => ({
         ...p,
         id: p.id || p._id?.toString() || p.ppfId || p.pId,
         ppfId: p.ppfId || p.id || p._id?.toString() || p.pId,
-        name: p.name || p.ppfName || "Unnamed PPF"
+        name: p.name || p.ppfName || "Unnamed PPF",
+        price: p.price || 0
       })) || [],
       accessories: (j as any).accessories?.map((a: any) => ({
         ...a,
         id: a.id || a._id?.toString() || a.accessoryId,
         accessoryId: a.accessoryId || a.id || a._id?.toString(),
-        name: a.name || a.accessoryName || "Unnamed Accessory"
+        name: a.name || a.accessoryName || "Unnamed Accessory",
+        price: a.price || 0
       })) || [],
       vehicleType: (j as any).vehicleType
     } as JobCard;
@@ -693,19 +696,22 @@ export class MongoStorage implements IStorage {
         ...s,
         id: s.id || s._id?.toString() || s.serviceId,
         serviceId: s.serviceId || s.id || s._id?.toString(),
-        name: s.name || s.serviceName || "Unnamed Service"
+        name: s.name || s.serviceName || "Unnamed Service",
+        price: s.price || 0
       })) || [],
       ppfs: (j as any).ppfs?.map((p: any) => ({
         ...p,
         id: p.id || p._id?.toString() || p.ppfId || p.pId,
         ppfId: p.ppfId || p.id || p._id?.toString() || p.pId,
-        name: p.name || p.ppfName || "Unnamed PPF"
+        name: p.name || p.ppfName || "Unnamed PPF",
+        price: p.price || 0
       })) || [],
       accessories: (j as any).accessories?.map((a: any) => ({
         ...a,
         id: a.id || a._id?.toString() || a.accessoryId,
         accessoryId: a.accessoryId || a.id || a._id?.toString(),
-        name: a.name || a.accessoryName || "Unnamed Accessory"
+        name: a.name || a.accessoryName || "Unnamed Accessory",
+        price: a.price || 0
       })) || [],
       vehicleType: (j as any).vehicleType
     })) as JobCard[];
