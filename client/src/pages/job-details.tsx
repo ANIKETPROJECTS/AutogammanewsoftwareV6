@@ -241,7 +241,7 @@ export default function JobDetailsPage() {
                           <Badge variant="outline" className="text-[10px] uppercase bg-blue-50 text-blue-700 border-blue-200">Service</Badge>
                         </TableCell>
                         <TableCell className="text-sm font-semibold text-slate-800">
-                          {service.name?.split(" - Tech:")[0] || service.name || "Unnamed Service"}
+                          {service.name?.split(" - Tech:")[0] || (service as any).serviceName || "Unnamed Service"}
                         </TableCell>
                         <TableCell className="text-center text-sm text-slate-600">1</TableCell>
                         <TableCell className="text-right pr-6 text-sm font-bold text-slate-900">₹{(service.price || 0).toLocaleString()}</TableCell>
@@ -254,7 +254,7 @@ export default function JobDetailsPage() {
                         </TableCell>
                         <TableCell className="text-sm font-semibold text-slate-800">
                           <div className="flex flex-col">
-                            <span>{ppf.name?.split(" - Tech:")[0] || ppf.name || "Unnamed PPF"}</span>
+                            <span>{ppf.name?.split(" - Tech:")[0] || (ppf as any).ppfName || "Unnamed PPF"}</span>
                             {ppf.rollUsed && (
                               <span className="text-[10px] text-slate-500 font-normal mt-0.5">Usage: {ppf.rollUsed} SQFT</span>
                             )}
@@ -269,7 +269,7 @@ export default function JobDetailsPage() {
                         <TableCell className="pl-6">
                           <Badge variant="outline" className="text-[10px] uppercase bg-orange-50 text-orange-700 border-orange-200">Accessory</Badge>
                         </TableCell>
-                        <TableCell className="text-sm font-semibold text-slate-800">{accessory.name}</TableCell>
+                        <TableCell className="text-sm font-semibold text-slate-800">{(accessory as any).name || (accessory as any).accessoryName || "Unnamed Accessory"}</TableCell>
                         <TableCell className="text-center text-sm text-slate-600">{accessory.quantity || 1}</TableCell>
                         <TableCell className="text-right pr-6 text-sm font-bold text-slate-900">₹{(accessory.price || 0).toLocaleString()}</TableCell>
                       </TableRow>
