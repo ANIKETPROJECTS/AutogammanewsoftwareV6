@@ -199,7 +199,11 @@ export default function AddJobPage() {
           
           console.log('Mapping PPF entry:', { ppfId, warranty, original: p });
           
-          const existing = acc.find(item => String(item.ppfId) === ppfId && item.warranty === warranty);
+          // Improved existing entry matching: explicitly handle cases where ppfId might be missing or different field names
+          const existing = acc.find(item => {
+            const itemPpfId = String(item.ppfId || item.id || item._id);
+            return itemPpfId === ppfId && item.warranty === warranty;
+          });
           
           if (existing) {
             // Group rolls for same PPF and Warranty

@@ -668,7 +668,7 @@ export class MongoStorage implements IStorage {
       })) || [],
       ppfs: (j as any).ppfs?.map((p: any) => ({
         ...p,
-        ppfId: p.ppfId || p.id || p._id?.toString()
+        ppfId: p.ppfId || p.id || p._id?.toString() || p.pId
       })) || [],
       accessories: (j as any).accessories?.map((a: any) => ({
         ...a,
@@ -689,7 +689,7 @@ export class MongoStorage implements IStorage {
       })) || [],
       ppfs: (j as any).ppfs?.map((p: any) => ({
         ...p,
-        ppfId: p.ppfId || p.id || p._id?.toString()
+        ppfId: p.ppfId || p.id || p._id?.toString() || p.pId
       })) || [],
       accessories: (j as any).accessories?.map((a: any) => ({
         ...a,
