@@ -194,10 +194,10 @@ export default function AddJobPage() {
           technician: s.technician
         })),
         ppfs: (jobToEdit.ppfs || []).reduce((acc: any[], p: any) => {
-          const ppfId = (p as any).ppfId || (p as any).id;
+          const ppfId = String((p as any).ppfId || (p as any).id || (p as any)._id);
           const warranty = (p as any).warranty || p.name.match(/\((.*)\)/)?.[1]?.split(" - ")?.[1] || "";
           
-          const existing = acc.find(item => item.ppfId === ppfId && item.warranty === warranty);
+          const existing = acc.find(item => String(item.ppfId) === ppfId && item.warranty === warranty);
           
           if (existing) {
             // Group rolls for same PPF and Warranty
@@ -451,7 +451,7 @@ export default function AddJobPage() {
       // Updated matching logic to be more robust during edits
       const existingPPFIndex = currentPPFs.findIndex(
         (field: any) => {
-          const fieldPpfId = String(field.ppfId || field.id);
+          const fieldPpfId = String(field.ppfId || field.id || field._id);
           const match = fieldPpfId === String(p.id) && field.warranty === selectedWarranty;
           console.log(`Checking match for field:`, {
             fieldPpfId,
