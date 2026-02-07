@@ -241,7 +241,7 @@ export default function JobDetailsPage() {
                           <Badge variant="outline" className="text-[10px] uppercase bg-blue-50 text-blue-700 border-blue-200">Service</Badge>
                         </TableCell>
                         <TableCell className="text-sm font-semibold text-slate-800">
-                          {service.name.split(" - Tech:")[0]}
+                          {service.name?.split(" - Tech:")[0] || service.name || "Unnamed Service"}
                         </TableCell>
                         <TableCell className="text-center text-sm text-slate-600">1</TableCell>
                         <TableCell className="text-right pr-6 text-sm font-bold text-slate-900">₹{service.price.toLocaleString()}</TableCell>
@@ -254,7 +254,7 @@ export default function JobDetailsPage() {
                         </TableCell>
                         <TableCell className="text-sm font-semibold text-slate-800">
                           <div className="flex flex-col">
-                            <span>{ppf.name.split(" - Tech:")[0]}</span>
+                            <span>{ppf.name?.split(" - Tech:")[0] || ppf.name || "Unnamed PPF"}</span>
                             {ppf.rollUsed && (
                               <span className="text-[10px] text-slate-500 font-normal mt-0.5">Usage: {ppf.rollUsed} SQFT</span>
                             )}
