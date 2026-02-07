@@ -662,9 +662,18 @@ export class MongoStorage implements IStorage {
     return {
       ...j.toObject(),
       id: j._id.toString(),
-      services: (j as any).services || [],
-      ppfs: (j as any).ppfs || [],
-      accessories: (j as any).accessories || [],
+      services: (j as any).services?.map((s: any) => ({
+        ...s,
+        serviceId: s.serviceId || s.id || s._id?.toString()
+      })) || [],
+      ppfs: (j as any).ppfs?.map((p: any) => ({
+        ...p,
+        ppfId: p.ppfId || p.id || p._id?.toString()
+      })) || [],
+      accessories: (j as any).accessories?.map((a: any) => ({
+        ...a,
+        accessoryId: a.accessoryId || a.id || a._id?.toString()
+      })) || [],
       vehicleType: (j as any).vehicleType
     } as JobCard;
   }
@@ -674,9 +683,18 @@ export class MongoStorage implements IStorage {
     return jobs.map(j => ({
       ...j.toObject(),
       id: j._id.toString(),
-      services: (j as any).services || [],
-      ppfs: (j as any).ppfs || [],
-      accessories: (j as any).accessories || [],
+      services: (j as any).services?.map((s: any) => ({
+        ...s,
+        serviceId: s.serviceId || s.id || s._id?.toString()
+      })) || [],
+      ppfs: (j as any).ppfs?.map((p: any) => ({
+        ...p,
+        ppfId: p.ppfId || p.id || p._id?.toString()
+      })) || [],
+      accessories: (j as any).accessories?.map((a: any) => ({
+        ...a,
+        accessoryId: a.accessoryId || a.id || a._id?.toString()
+      })) || [],
       vehicleType: (j as any).vehicleType
     })) as JobCard[];
   }

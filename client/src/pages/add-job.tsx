@@ -197,6 +197,8 @@ export default function AddJobPage() {
           const ppfId = String((p as any).ppfId || (p as any).id || (p as any)._id);
           const warranty = (p as any).warranty || p.name.match(/\((.*)\)/)?.[1]?.split(" - ")?.[1] || "";
           
+          console.log('Mapping PPF entry:', { ppfId, warranty, original: p });
+          
           const existing = acc.find(item => String(item.ppfId) === ppfId && item.warranty === warranty);
           
           if (existing) {
@@ -452,7 +454,7 @@ export default function AddJobPage() {
       const existingPPFIndex = currentPPFs.findIndex(
         (field: any) => {
           const fieldPpfId = String(field.ppfId || field.id || field._id);
-          const match = fieldPpfId === String(p.id) && field.warranty === selectedWarranty;
+          const match = fieldPpfId === String(p.id) && String(field.warranty) === String(selectedWarranty);
           console.log(`Checking match for field:`, {
             fieldPpfId,
             pId: p.id,
