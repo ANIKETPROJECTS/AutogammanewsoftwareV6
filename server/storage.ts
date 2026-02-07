@@ -664,14 +664,17 @@ export class MongoStorage implements IStorage {
       id: j._id.toString(),
       services: (j as any).services?.map((s: any) => ({
         ...s,
+        id: s.id || s._id?.toString() || s.serviceId,
         serviceId: s.serviceId || s.id || s._id?.toString()
       })) || [],
       ppfs: (j as any).ppfs?.map((p: any) => ({
         ...p,
+        id: p.id || p._id?.toString() || p.ppfId || p.pId,
         ppfId: p.ppfId || p.id || p._id?.toString() || p.pId
       })) || [],
       accessories: (j as any).accessories?.map((a: any) => ({
         ...a,
+        id: a.id || a._id?.toString() || a.accessoryId,
         accessoryId: a.accessoryId || a.id || a._id?.toString()
       })) || [],
       vehicleType: (j as any).vehicleType
@@ -685,14 +688,17 @@ export class MongoStorage implements IStorage {
       id: j._id.toString(),
       services: (j as any).services?.map((s: any) => ({
         ...s,
+        id: s.id || s._id?.toString() || s.serviceId,
         serviceId: s.serviceId || s.id || s._id?.toString()
       })) || [],
       ppfs: (j as any).ppfs?.map((p: any) => ({
         ...p,
+        id: p.id || p._id?.toString() || p.ppfId || p.pId,
         ppfId: p.ppfId || p.id || p._id?.toString() || p.pId
       })) || [],
       accessories: (j as any).accessories?.map((a: any) => ({
         ...a,
+        id: a.id || a._id?.toString() || a.accessoryId,
         accessoryId: a.accessoryId || a.id || a._id?.toString()
       })) || [],
       vehicleType: (j as any).vehicleType

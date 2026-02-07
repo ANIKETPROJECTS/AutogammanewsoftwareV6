@@ -580,9 +580,34 @@ export default function AddJobPage() {
         year: values.year,
         licensePlate: values.licensePlate,
         vehicleType: values.vehicleType,
-        services: values.services,
-        ppfs: values.ppfs,
-        accessories: values.accessories,
+        services: values.services.map(s => ({
+          id: s.serviceId || s.id,
+          serviceId: s.serviceId || s.id,
+          name: s.name,
+          price: s.price,
+          technician: s.technician,
+          business: s.business || "Auto Gamma"
+        })),
+        ppfs: values.ppfs.map(p => ({
+          id: p.ppfId || p.id,
+          ppfId: p.ppfId || p.id,
+          name: p.name,
+          price: p.price,
+          technician: p.technician,
+          rollId: p.rollId,
+          rollUsed: p.rollUsed,
+          rollsUsed: p.rollsUsed,
+          warranty: p.warranty,
+          business: p.business || "Auto Gamma"
+        })),
+        accessories: values.accessories.map(a => ({
+          id: a.accessoryId || a.id,
+          accessoryId: a.accessoryId || a.id,
+          name: a.name,
+          price: a.price,
+          quantity: a.quantity,
+          business: a.business || "Auto Gamma"
+        })),
         laborCharge: values.laborCharge,
         discount: values.discount,
         gst: values.gst,
